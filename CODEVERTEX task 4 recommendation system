@@ -1,0 +1,44 @@
+Certainly! Let's create a simple collaborative filtering recommendation system. We'll use a matrix to represent user-item interactions, and then calculate similarities between users or items.
+
+```python
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Sample user-item matrix (rows represent users, columns represent items)
+user_item_matrix = np.array([
+    [1, 0, 2, 0, 3],
+    [2, 0, 3, 0, 4],
+    [0, 1, 0, 2, 0],
+    [0, 3, 0, 4, 0],
+])
+
+# Calculate user-user similarity using cosine similarity
+user_similarity = cosine_similarity(user_item_matrix)
+
+# Function to recommend items to a user based on collaborative filtering
+def recommend_items(user_id, user_item_matrix, user_similarity, n=2):
+    user_ratings = user_item_matrix[user_id]
+    similar_users = np.argsort(user_similarity[user_id])[::-1][1:]  # Exclude the user itself
+    
+    recommended_items = np.zeros_like(user_ratings)
+    
+    for similar_user in similar_users:
+        similar_user_ratings = user_item_matrix[similar_user]
+        non_zero_ratings = np.where(similar_user_ratings > 0)
+        
+        for item in non_zero_ratings[0]:
+            if user_ratings[item] == 0:  # Only recommend items not rated by the user
+                recommended_items[item] += user_similarity[user_id][similar_user] * similar_user_ratings[item]
+    
+    # Sort recommended items by score
+    sorted_items = np.argsort(recommended_items)[::-1]
+    
+    # Return top n recommended items
+    return sorted_items[:n]
+
+# Example: Recommend 2 items for user 0
+recommendations = recommend_items(0, user_item_matrix, user_similarity, n=2)
+print("Recommended items:", recommendations)
+```
+
+This is a basic collaborative filtering recommendation system. You can customize the user-item matrix with your own data and fine-tune parameters for your specific use case.
